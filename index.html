@@ -1,0 +1,1216 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>EffectErase: Joint Video Object Removal and Insertion for High-Quality Effect Erasing</title>
+    <style>
+      :root {
+        --bg: #ffffff;
+        --fg: #0b1220;
+        --muted: #5b677a;
+        --line: rgba(11, 18, 32, 0.12);
+        --card: rgba(11, 18, 32, 0.04);
+        --brand: #1b5fbf;
+        --brand2: #0f4aa0;
+        --shadow: 0 12px 30px rgba(11, 18, 32, 0.10);
+        --radius: 14px;
+        --max: 1040px;
+        --hero: #070b14;
+        --hero2: #0b1220;
+        --heroLine: rgba(255, 255, 255, 0.16);
+        --heroText: rgba(255, 255, 255, 0.92);
+        --heroMuted: rgba(255, 255, 255, 0.72);
+      }
+
+      * { box-sizing: border-box; }
+      html, body { height: 100%; }
+      body {
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+        background: var(--bg);
+        color: var(--fg);
+        line-height: 1.5;
+      }
+
+      a { color: var(--brand); text-decoration: none; }
+      a:hover { color: var(--brand2); text-decoration: underline; }
+
+      .hero {
+        background: radial-gradient(1100px 520px at 30% -10%, rgba(230, 60, 60, 0.22), rgba(0,0,0,0)),
+          radial-gradient(900px 540px at 90% 0%, rgba(44, 124, 255, 0.24), rgba(0,0,0,0)),
+          linear-gradient(180deg, var(--hero), var(--hero2));
+        color: var(--heroText);
+        border-bottom: 1px solid var(--heroLine);
+      }
+      .wrap { max-width: var(--max); margin: 0 auto; padding: 26px 18px 70px; }
+      .top { padding: 22px 0 22px; }
+      .title {
+        font-size: clamp(26px, 3.0vw, 40px);
+        line-height: 1.12;
+        letter-spacing: -0.02em;
+        margin: 0 0 10px;
+        text-wrap: balance;
+      }
+      .venue { color: var(--heroMuted); font-weight: 650; margin: 0 0 14px; }
+      .authors { margin: 0 0 10px; font-size: 15px; color: var(--heroText); }
+      .affiliations { margin: 0 0 14px; color: var(--heroMuted); font-size: 14px; }
+      .links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 12px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        background: rgba(0, 0, 0, 0.28);
+        color: rgba(255, 255, 255, 0.92);
+        font-weight: 700;
+        font-size: 13px;
+        box-shadow: 0 1px 0 rgba(0,0,0,0.2);
+      }
+      button.btn { cursor: pointer; }
+      button.btn { appearance: none; -webkit-appearance: none; }
+      button.btn { outline: none; }
+      .btn:hover { text-decoration: none; background: rgba(0, 0, 0, 0.38); }
+      .btn.primary { border-color: rgba(255, 255, 255, 0.26); background: rgba(255, 255, 255, 0.12); }
+      .btn.disabled { opacity: 0.55; pointer-events: none; }
+      .btn .ico { width: 16px; height: 16px; display: inline-block; }
+
+      .section { padding: 26px 0; border-bottom: 1px solid var(--line); }
+      .section:last-child { border-bottom: 0; }
+      .h2 { margin: 0 0 12px; font-size: 20px; letter-spacing: -0.01em; }
+      .p { margin: 0 0 12px; color: var(--fg); }
+      .muted { color: var(--muted); }
+
+      .grid2 { display: grid; grid-template-columns: 1fr; gap: 14px; }
+      @media (min-width: 960px) { .grid2 { grid-template-columns: 1.15fr 0.85fr; align-items: start; } }
+
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 14px;
+        box-shadow: var(--shadow);
+      }
+
+      .figure {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+
+      .figure img { width: 100%; display: block; }
+      .figCap { margin-top: 8px; font-size: 13px; color: var(--muted); line-height: 1.45; }
+
+      .videoFull {
+        width: 100%;
+        border-radius: 16px;
+        background: #000;
+        display: block;
+      }
+
+      .cmpWrap { margin-top: 18px; }
+      .cmpTitle { font-size: 14px; font-weight: 750; margin: 0 0 10px; color: var(--heroText); }
+      .cmpSub { font-size: 12px; margin: 8px 0 0; color: var(--heroMuted); }
+      .cmpGrid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin-top: 12px;
+      }
+      @media (min-width: 760px) { .cmpGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+      @media (min-width: 1040px) { .cmpGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+      .cmpItem { display: grid; gap: 8px; }
+      .cmpCase {
+        font-size: 12px;
+        color: var(--heroMuted);
+        font-weight: 650;
+        letter-spacing: 0.01em;
+      }
+      .cmp {
+        --pos: 55;
+        --ratio: 56.25%;
+        position: relative;
+        width: 100%;
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        box-shadow: 0 16px 40px rgba(0,0,0,0.35);
+        background: #000;
+        user-select: none;
+        touch-action: none;
+      }
+      .cmp::before {
+        content: "";
+        display: block;
+        padding-top: var(--ratio);
+      }
+      .cmpLayer {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+      }
+      .cmpLayer.overlay {
+        width: 100%;
+        -webkit-clip-path: inset(0 calc(100% - (var(--pos) * 1%)) 0 0);
+        clip-path: inset(0 calc(100% - (var(--pos) * 1%)) 0 0);
+      }
+      .cmpVideo {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        object-fit: cover;
+        object-position: center;
+      }
+      .cmpHandle {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: calc(var(--pos) * 1%);
+        width: 0;
+        pointer-events: none;
+      }
+      .cmpHandle::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: -1px;
+        width: 2px;
+        background: rgba(255, 255, 255, 0.85);
+        box-shadow: 0 0 0 1px rgba(0,0,0,0.35);
+      }
+      .cmpHandle::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: -14px;
+        width: 28px;
+        height: 28px;
+        border-radius: 999px;
+        transform: translateY(-50%);
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow: 0 10px 28px rgba(0,0,0,0.35);
+      }
+      .cmpLabels {
+        position: absolute;
+        left: 12px;
+        right: 12px;
+        top: 12px;
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        pointer-events: none;
+      }
+      .cmpLabel {
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 750;
+        color: rgba(255, 255, 255, 0.92);
+        background: rgba(0, 0, 0, 0.35);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        backdrop-filter: blur(6px);
+      }
+      .bullets { margin: 0; padding-left: 18px; color: var(--fg); }
+      .bullets li { margin: 6px 0; }
+
+      .gallery {
+        display: grid;
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+        gap: 12px;
+      }
+      @media (min-width: 700px) { .gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+      @media (min-width: 1040px) { .gallery { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+      .demoGrid {
+        display: grid;
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+        gap: 12px;
+      }
+      @media (min-width: 700px) { .demoGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+      @media (min-width: 1040px) { .demoGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+      .demoVideo {
+        width: 100%;
+        border-radius: 16px;
+        background: #000;
+        display: block;
+        box-shadow: 0 18px 50px rgba(0,0,0,0.12);
+      }
+
+      .vidcard { padding: 10px; border-radius: 14px; border: 1px solid var(--line); background: #fff; }
+      .vidcard h3 { font-size: 14px; margin: 0 0 8px; color: var(--fg); font-weight: 650; }
+      .vidcard video { width: 100%; border-radius: 12px; background: #000; display: block; }
+      .vidcard .cap { margin-top: 8px; font-size: 12px; color: var(--muted); }
+      .subh { margin: 16px 0 10px; font-size: 14px; font-weight: 800; letter-spacing: -0.01em; }
+      .capStrong { font-weight: 750; color: var(--fg); }
+      .compBlock { margin-top: 10px; }
+      .thumbRow { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: center; }
+      .thumbBtn {
+        border: 1px solid rgba(17, 24, 39, 0.18);
+        background: #fff;
+        border-radius: 12px;
+        padding: 6px;
+        cursor: pointer;
+      }
+      .thumbBtn.isActive { border-color: rgba(37, 99, 235, 0.9); box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.22); }
+      .thumbBtn:focus-visible { outline: 2px solid rgba(37, 99, 235, 0.75); outline-offset: 2px; }
+      .thumbImg {
+        width: 110px;
+        height: 62px;
+        border-radius: 10px;
+        background: #0b1220;
+        display: block;
+        object-fit: cover;
+      }
+      .mainWrap { margin-top: 12px; display: flex; justify-content: center; }
+      .mainFrame {
+        width: min(1180px, 100%);
+        display: grid;
+        gap: 10px;
+      }
+      .mainFrame.vert { width: min(760px, 100%); }
+      .mainVideo {
+        width: 100%;
+        border-radius: 16px;
+        background: #000;
+        display: block;
+        box-shadow: 0 18px 50px rgba(0,0,0,0.22);
+      }
+      .mainVideo.vert { max-height: 760px; object-fit: contain; }
+      .methodRow {
+        display: grid;
+        grid-template-columns: repeat(var(--cols, 4), minmax(0, 1fr));
+        gap: 8px;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+      }
+      .methodCell {
+        font-size: 13px;
+        font-weight: 750;
+        letter-spacing: -0.01em;
+        color: rgba(17, 24, 39, 0.88);
+      }
+      .caseRow { margin-top: 8px; text-align: center; font-size: 12px; color: rgba(107, 114, 128, 0.95); font-weight: 650; }
+
+      pre {
+        margin: 0;
+        padding: 12px 14px;
+        border-radius: 14px;
+        border: 1px solid var(--line);
+        background: #0b1220;
+        color: #dbe6ff;
+        overflow-x: auto;
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .foot { padding-top: 16px; font-size: 13px; color: var(--muted); }
+    </style>
+  </head>
+  <body>
+    <header class="hero">
+      <div class="wrap">
+        <div class="top">
+          <h1 class="title">EffectErase: Joint Video Object Removal<br />and Insertion for High-Quality Effect Erasing</h1>
+          <p class="venue">CVPR 2026</p>
+          <p class="authors">
+            <a href="https://www.yangfu.site/" target="_blank" rel="noreferrer">Yang Fu</a>
+            &nbsp;·&nbsp;
+            <a href="https://henghuiding.com/group/" target="_blank" rel="noreferrer">Yike Zheng</a>
+            &nbsp;·&nbsp;
+            <a href="https://github.com/oliviadzy" target="_blank" rel="noreferrer">Ziyun Dai</a>
+            &nbsp;·&nbsp;
+            <a href="https://henghuiding.com/" target="_blank" rel="noreferrer">Henghui Ding</a><span class="muted">†</span>
+          </p>
+          <p class="affiliations">
+            Institute of Big Data, College of Computer Science and Artificial Intelligence, Fudan University, China
+            <br />
+            <span class="muted">† Corresponding author</span>
+          </p>
+          <div class="links">
+            <a class="btn" href="https://cvpr.thecvf.com/virtual/2026/papers.html" target="_blank" rel="noreferrer">
+              <svg class="ico" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M6 2h9l3 3v17H6V2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                <path d="M15 2v5h5" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                <path d="M8 14h8M8 18h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              <span>Paper</span>
+            </a>
+            <a class="btn" href="https://cvpr.thecvf.com/virtual/2026/papers.html" target="_blank" rel="noreferrer">
+              <svg class="ico" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M6 2h9l3 3v17H6V2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                <path d="M15 2v5h5" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                <path d="M8 14h8M8 18h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              <span>Supp</span>
+            </a>
+            <a class="btn" href="http://arxiv.org/" target="_blank" rel="noreferrer">
+              <svg class="ico" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M9 18a3 3 0 0 0 6 0v-1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M12 2a5 5 0 0 0-5 5v4.5l-1.2 2.4A1 1 0 0 0 6.7 16H17.3a1 1 0 0 0 .9-1.46L17 11.5V7a5 5 0 0 0-5-5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              </svg>
+              <span>arXiv</span>
+            </a>
+            <a class="btn" href="https://github.com/FudanCVL/EffectErase" target="_blank" rel="noreferrer">
+              <svg class="ico" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M14 3h7v7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M10 14 21 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              <span>Code</span>
+            </a>
+            <a class="btn" href="https://huggingface.co/datasets/FudanCVL/EffectErase" target="_blank" rel="noreferrer">
+              <svg class="ico" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M21 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M7 7a5 5 0 0 1 10 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M12 11v6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M9.5 14.5 12 17l2.5-2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span>Dataset</span>
+            </a>
+            <button class="btn" type="button" id="bibtexCopyBtn" aria-label="Copy BibTeX">
+              <svg class="ico" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M4 19a2 2 0 0 0 2 2h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M6 2h12v18H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                <path d="M8 6h8M8 10h8M8 14h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              <span id="bibtexCopyLabel">BibTeX</span>
+            </button>
+          </div>
+
+          <div class="cmpWrap">
+            <div class="cmpTitle">Drag to see removal results</div>
+            <div class="cmpGrid">
+              <div class="cmpItem">
+                <div class="cmp js-cmp" style="--pos: 50" aria-label="FG_BG vs BG">
+                  <div class="cmpLayer base">
+                    <video class="cmpVideo js-cmp-base" muted autoplay playsinline loop preload="metadata">
+                      <source src="assets/video/effect_drag_bg.mp4" type="video/mp4" />
+                    </video>
+                  </div>
+                  <div class="cmpLayer overlay js-cmp-overlay">
+                    <video class="cmpVideo js-cmp-over" muted autoplay playsinline loop preload="metadata">
+                      <source src="assets/video/effect_drag_fgbg.mp4" type="video/mp4" />
+                    </video>
+                  </div>
+                  <div class="cmpLabels" aria-hidden="true">
+                    <div class="cmpLabel">Input</div>
+                    <div class="cmpLabel">Remove</div>
+                  </div>
+                  <div class="cmpHandle" aria-hidden="true"></div>
+                </div>
+                <div class="cmpCase">WILD_ENV001_00024</div>
+              </div>
+
+              <div class="cmpItem">
+                <div class="cmp js-cmp" style="--pos: 50" aria-label="FG_BG vs BG">
+                  <div class="cmpLayer base">
+                    <video class="cmpVideo js-cmp-base" muted autoplay playsinline loop preload="metadata">
+                      <source src="assets/video/effect_grid_WILD_ENV001_00044_bg.mp4" type="video/mp4" />
+                    </video>
+                  </div>
+                  <div class="cmpLayer overlay js-cmp-overlay">
+                    <video class="cmpVideo js-cmp-over" muted autoplay playsinline loop preload="metadata">
+                      <source src="assets/video/effect_grid_WILD_ENV001_00044_fgbg.mp4" type="video/mp4" />
+                    </video>
+                  </div>
+                  <div class="cmpLabels" aria-hidden="true">
+                    <div class="cmpLabel">Input</div>
+                    <div class="cmpLabel">Remove</div>
+                  </div>
+                  <div class="cmpHandle" aria-hidden="true"></div>
+                </div>
+                <div class="cmpCase">WILD_ENV001_00044</div>
+              </div>
+
+              <div class="cmpItem">
+                <div class="cmp js-cmp" style="--pos: 50" aria-label="FG_BG vs BG">
+                  <div class="cmpLayer base">
+                    <video class="cmpVideo js-cmp-base" muted autoplay playsinline loop preload="metadata">
+                      <source src="assets/video/effect_grid_WILD_ENV001_00045_bg.mp4" type="video/mp4" />
+                    </video>
+                  </div>
+                  <div class="cmpLayer overlay js-cmp-overlay">
+                    <video class="cmpVideo js-cmp-over" muted autoplay playsinline loop preload="metadata">
+                      <source src="assets/video/effect_grid_WILD_ENV001_00045_fgbg.mp4" type="video/mp4" />
+                    </video>
+                  </div>
+                  <div class="cmpLabels" aria-hidden="true">
+                    <div class="cmpLabel">Input</div>
+                    <div class="cmpLabel">Remove</div>
+                  </div>
+                  <div class="cmpHandle" aria-hidden="true"></div>
+                </div>
+                <div class="cmpCase">WILD_ENV001_00045</div>
+              </div>
+
+              <div class="cmpItem">
+                <div class="cmp js-cmp" style="--pos: 50" aria-label="FG_BG vs BG">
+                  <div class="cmpLayer base">
+                    <video class="cmpVideo js-cmp-base" muted autoplay playsinline loop preload="metadata">
+                      <source src="assets/video/effect_grid_WILD_ENV002_00062_bg.mp4" type="video/mp4" />
+                    </video>
+                  </div>
+                  <div class="cmpLayer overlay js-cmp-overlay">
+                    <video class="cmpVideo js-cmp-over" muted autoplay playsinline loop preload="metadata">
+                      <source src="assets/video/effect_grid_WILD_ENV002_00062_fgbg.mp4" type="video/mp4" />
+                    </video>
+                  </div>
+                  <div class="cmpLabels" aria-hidden="true">
+                    <div class="cmpLabel">Input</div>
+                    <div class="cmpLabel">Remove</div>
+                  </div>
+                  <div class="cmpHandle" aria-hidden="true"></div>
+                </div>
+                <div class="cmpCase">WILD_ENV002_00062</div>
+              </div>
+
+              <div class="cmpItem">
+                <div class="cmp js-cmp" style="--pos: 50" aria-label="FG_BG vs BG">
+                  <div class="cmpLayer base">
+                    <video class="cmpVideo js-cmp-base" muted autoplay playsinline loop preload="metadata">
+                      <source src="assets/video/effect_grid_WILD_ENV001_00092_bg.mp4" type="video/mp4" />
+                    </video>
+                  </div>
+                  <div class="cmpLayer overlay js-cmp-overlay">
+                    <video class="cmpVideo js-cmp-over" muted autoplay playsinline loop preload="metadata">
+                      <source src="assets/video/effect_grid_WILD_ENV001_00092_fgbg.mp4" type="video/mp4" />
+                    </video>
+                  </div>
+                  <div class="cmpLabels" aria-hidden="true">
+                    <div class="cmpLabel">Input</div>
+                    <div class="cmpLabel">Remove</div>
+                  </div>
+                  <div class="cmpHandle" aria-hidden="true"></div>
+                </div>
+                <div class="cmpCase">WILD_ENV001_00092</div>
+              </div>
+
+              <div class="cmpItem">
+                <div class="cmp js-cmp" style="--pos: 50" aria-label="FG_BG vs BG">
+                  <div class="cmpLayer base">
+                    <video class="cmpVideo js-cmp-base" muted autoplay playsinline loop preload="metadata">
+                      <source src="assets/video/effect_grid_WILD_ENV003_00031_bg.mp4" type="video/mp4" />
+                    </video>
+                  </div>
+                  <div class="cmpLayer overlay js-cmp-overlay">
+                    <video class="cmpVideo js-cmp-over" muted autoplay playsinline loop preload="metadata">
+                      <source src="assets/video/effect_grid_WILD_ENV003_00031_fgbg.mp4" type="video/mp4" />
+                    </video>
+                  </div>
+                  <div class="cmpLabels" aria-hidden="true">
+                    <div class="cmpLabel">Input</div>
+                    <div class="cmpLabel">Remove</div>
+                  </div>
+                  <div class="cmpHandle" aria-hidden="true"></div>
+                </div>
+                <div class="cmpCase">WILD_ENV003_00031</div>
+              </div>
+
+              <div class="cmpItem">
+                <div class="cmp js-cmp" style="--pos: 50" aria-label="FG_BG vs BG">
+                  <div class="cmpLayer base">
+                    <video class="cmpVideo js-cmp-base" muted autoplay playsinline loop preload="metadata">
+                      <source src="assets/video/effect_grid_WILD_ENV002_00039_bg.mp4" type="video/mp4" />
+                    </video>
+                  </div>
+                  <div class="cmpLayer overlay js-cmp-overlay">
+                    <video class="cmpVideo js-cmp-over" muted autoplay playsinline loop preload="metadata">
+                      <source src="assets/video/effect_grid_WILD_ENV002_00039_fgbg.mp4" type="video/mp4" />
+                    </video>
+                  </div>
+                  <div class="cmpLabels" aria-hidden="true">
+                    <div class="cmpLabel">Input</div>
+                    <div class="cmpLabel">Remove</div>
+                  </div>
+                  <div class="cmpHandle" aria-hidden="true"></div>
+                </div>
+                <div class="cmpCase">WILD_ENV002_00039</div>
+              </div>
+
+              <div class="cmpItem">
+                <div class="cmp js-cmp" style="--pos: 50" aria-label="FG_BG vs BG">
+                  <div class="cmpLayer base">
+                    <video class="cmpVideo js-cmp-base" muted autoplay playsinline loop preload="metadata">
+                      <source src="assets/video/effect_grid_WILD_ENV003_00037_bg.mp4" type="video/mp4" />
+                    </video>
+                  </div>
+                  <div class="cmpLayer overlay js-cmp-overlay">
+                    <video class="cmpVideo js-cmp-over" muted autoplay playsinline loop preload="metadata">
+                      <source src="assets/video/effect_grid_WILD_ENV003_00037_fgbg.mp4" type="video/mp4" />
+                    </video>
+                  </div>
+                  <div class="cmpLabels" aria-hidden="true">
+                    <div class="cmpLabel">Input</div>
+                    <div class="cmpLabel">Remove</div>
+                  </div>
+                  <div class="cmpHandle" aria-hidden="true"></div>
+                </div>
+                <div class="cmpCase">WILD_ENV003_00037</div>
+              </div>
+
+              <div class="cmpItem">
+                <div class="cmp js-cmp" style="--pos: 50" aria-label="FG_BG vs BG">
+                  <div class="cmpLayer base">
+                    <video class="cmpVideo js-cmp-base" muted autoplay playsinline loop preload="metadata">
+                      <source src="assets/video/effect_grid_WILD_ENV003_00026_bg.mp4" type="video/mp4" />
+                    </video>
+                  </div>
+                  <div class="cmpLayer overlay js-cmp-overlay">
+                    <video class="cmpVideo js-cmp-over" muted autoplay playsinline loop preload="metadata">
+                      <source src="assets/video/effect_grid_WILD_ENV003_00026_fgbg.mp4" type="video/mp4" />
+                    </video>
+                  </div>
+                  <div class="cmpLabels" aria-hidden="true">
+                    <div class="cmpLabel">Input</div>
+                    <div class="cmpLabel">Remove</div>
+                  </div>
+                  <div class="cmpHandle" aria-hidden="true"></div>
+                </div>
+                <div class="cmpCase">WILD_ENV003_00026</div>
+              </div>
+
+              <div class="cmpItem">
+                <div class="cmp js-cmp" style="--pos: 50" aria-label="FG_BG vs BG">
+                  <div class="cmpLayer base">
+                    <video class="cmpVideo js-cmp-base" muted autoplay playsinline loop preload="metadata">
+                      <source src="assets/video/effect_grid_WILD_ENV005_00028_bg.mp4" type="video/mp4" />
+                    </video>
+                  </div>
+                  <div class="cmpLayer overlay js-cmp-overlay">
+                    <video class="cmpVideo js-cmp-over" muted autoplay playsinline loop preload="metadata">
+                      <source src="assets/video/effect_grid_WILD_ENV005_00028_fgbg.mp4" type="video/mp4" />
+                    </video>
+                  </div>
+                  <div class="cmpLabels" aria-hidden="true">
+                    <div class="cmpLabel">Input</div>
+                    <div class="cmpLabel">Remove</div>
+                  </div>
+                  <div class="cmpHandle" aria-hidden="true"></div>
+                </div>
+                <div class="cmpCase">WILD_ENV005_00028</div>
+              </div>
+
+              <div class="cmpItem">
+                <div class="cmp js-cmp" style="--pos: 50" aria-label="FG_BG vs BG">
+                  <div class="cmpLayer base">
+                    <video class="cmpVideo js-cmp-base" muted autoplay playsinline loop preload="metadata">
+                      <source src="assets/video/effect_grid_WILD_ENV006_00039_bg.mp4" type="video/mp4" />
+                    </video>
+                  </div>
+                  <div class="cmpLayer overlay js-cmp-overlay">
+                    <video class="cmpVideo js-cmp-over" muted autoplay playsinline loop preload="metadata">
+                      <source src="assets/video/effect_grid_WILD_ENV006_00039_fgbg.mp4" type="video/mp4" />
+                    </video>
+                  </div>
+                  <div class="cmpLabels" aria-hidden="true">
+                    <div class="cmpLabel">Input</div>
+                    <div class="cmpLabel">Remove</div>
+                  </div>
+                  <div class="cmpHandle" aria-hidden="true"></div>
+                </div>
+                <div class="cmpCase">WILD_ENV006_00039</div>
+              </div>
+
+              <div class="cmpItem">
+                <div class="cmp js-cmp" style="--pos: 50" aria-label="FG_BG vs BG">
+                  <div class="cmpLayer base">
+                    <video class="cmpVideo js-cmp-base" muted autoplay playsinline loop preload="metadata">
+                      <source src="assets/video/effect_grid_WILD_ENV006_00040_bg.mp4" type="video/mp4" />
+                    </video>
+                  </div>
+                  <div class="cmpLayer overlay js-cmp-overlay">
+                    <video class="cmpVideo js-cmp-over" muted autoplay playsinline loop preload="metadata">
+                      <source src="assets/video/effect_grid_WILD_ENV006_00040_fgbg.mp4" type="video/mp4" />
+                    </video>
+                  </div>
+                  <div class="cmpLabels" aria-hidden="true">
+                    <div class="cmpLabel">Input</div>
+                    <div class="cmpLabel">Remove</div>
+                  </div>
+                  <div class="cmpHandle" aria-hidden="true"></div>
+                </div>
+                <div class="cmpCase">WILD_ENV006_00040</div>
+              </div>
+            </div>
+
+            <div class="cmpSub">Drag the vertical handle to compare the two videos.</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="wrap">
+      <section class="section" id="demo">
+        <h2 class="h2">Demo</h2>
+        <video class="videoFull" controls playsinline preload="metadata">
+          <source src="assets/video/demo.mp4" type="video/mp4" />
+        </video>
+      </section>
+
+      <section class="section" id="comparison">
+        <h2 class="h2">Comparison</h2>
+        <div class="compBlock js-comp-block" data-default-case="WILD_ENV001_00024">
+          <div class="subh">ObjectClear / OmniPaint / EffectErase</div>
+          <div class="thumbRow">
+            <button class="thumbBtn isActive js-comp-thumb" type="button" data-case="WILD_ENV001_00024" data-src="assets/video/comp_vor_objectclear_WILD_ENV001_00024_stack.mp4">
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV001_00024" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+            </button>
+            <button class="thumbBtn js-comp-thumb" type="button" data-case="WILD_ENV001_00032" data-src="assets/video/comp_vor_objectclear_WILD_ENV001_00032_stack.mp4">
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV001_00032" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+            </button>
+            <button class="thumbBtn js-comp-thumb" type="button" data-case="WILD_ENV002_00040" data-src="assets/video/comp_vor_objectclear_WILD_ENV002_00040_stack.mp4">
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV002_00040" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+            </button>
+            <button class="thumbBtn js-comp-thumb" type="button" data-case="WILD_ENV002_00062" data-src="assets/video/comp_vor_objectclear_WILD_ENV002_00062_stack.mp4">
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV002_00062" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+            </button>
+          </div>
+          <div class="mainWrap">
+            <div class="mainFrame" style="--cols: 4">
+              <video class="mainVideo js-comp-main" muted autoplay loop playsinline preload="metadata">
+                <source src="assets/video/comp_vor_objectclear_WILD_ENV001_00024_stack.mp4" type="video/mp4" />
+              </video>
+              <div class="methodRow">
+                <div class="methodCell">Input</div>
+                <div class="methodCell">ObjectClear</div>
+                <div class="methodCell">OmniPaint</div>
+                <div class="methodCell">EffectErase</div>
+              </div>
+            </div>
+          </div>
+          <div class="caseRow js-comp-case">WILD_ENV001_00024</div>
+        </div>
+
+        <div class="compBlock js-comp-block" data-default-case="WILD_ENV001_00024">
+          <div class="subh">ProPainter / DiffuEraser / VACE / EffectErase</div>
+          <div class="thumbRow">
+            <button class="thumbBtn isActive js-comp-thumb" type="button" data-case="WILD_ENV001_00024" data-src="assets/video/comp_vor_propainter_WILD_ENV001_00024_stack.mp4">
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV001_00024" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+            </button>
+            <button class="thumbBtn js-comp-thumb" type="button" data-case="WILD_ENV001_00032" data-src="assets/video/comp_vor_propainter_WILD_ENV001_00032_stack.mp4">
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV001_00032" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+            </button>
+            <button class="thumbBtn js-comp-thumb" type="button" data-case="WILD_ENV002_00040" data-src="assets/video/comp_vor_propainter_WILD_ENV002_00040_stack.mp4">
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV002_00040" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+            </button>
+            <button class="thumbBtn js-comp-thumb" type="button" data-case="WILD_ENV002_00062" data-src="assets/video/comp_vor_propainter_WILD_ENV002_00062_stack.mp4">
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV002_00062" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+            </button>
+          </div>
+          <div class="mainWrap">
+            <div class="mainFrame" style="--cols: 5">
+              <video class="mainVideo js-comp-main" muted autoplay loop playsinline preload="metadata">
+                <source src="assets/video/comp_vor_propainter_WILD_ENV001_00024_stack.mp4" type="video/mp4" />
+              </video>
+              <div class="methodRow">
+                <div class="methodCell">Input</div>
+                <div class="methodCell">ProPainter</div>
+                <div class="methodCell">DiffuEraser</div>
+                <div class="methodCell">VACE</div>
+                <div class="methodCell">EffectErase</div>
+              </div>
+            </div>
+          </div>
+          <div class="caseRow js-comp-case">WILD_ENV001_00024</div>
+        </div>
+
+        <div class="compBlock js-comp-block" data-default-case="WILD_ENV001_00024">
+          <div class="subh">Minmax-Remover / ROSE / EffectErase</div>
+          <div class="thumbRow">
+            <button class="thumbBtn isActive js-comp-thumb" type="button" data-case="WILD_ENV001_00024" data-src="assets/video/comp_vor_remove_WILD_ENV001_00024_stack.mp4">
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV001_00024" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+            </button>
+            <button class="thumbBtn js-comp-thumb" type="button" data-case="WILD_ENV001_00032" data-src="assets/video/comp_vor_remove_WILD_ENV001_00032_stack.mp4">
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV001_00032" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+            </button>
+            <button class="thumbBtn js-comp-thumb" type="button" data-case="WILD_ENV002_00040" data-src="assets/video/comp_vor_remove_WILD_ENV002_00040_stack.mp4">
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV002_00040" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+            </button>
+            <button class="thumbBtn js-comp-thumb" type="button" data-case="WILD_ENV002_00062" data-src="assets/video/comp_vor_remove_WILD_ENV002_00062_stack.mp4">
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV002_00062" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+            </button>
+          </div>
+          <div class="mainWrap">
+            <div class="mainFrame" style="--cols: 4">
+              <video class="mainVideo js-comp-main" muted autoplay loop playsinline preload="metadata">
+                <source src="assets/video/comp_vor_remove_WILD_ENV001_00024_stack.mp4" type="video/mp4" />
+              </video>
+              <div class="methodRow">
+                <div class="methodCell">Input</div>
+                <div class="methodCell">Minmax-Remover</div>
+                <div class="methodCell">ROSE</div>
+                <div class="methodCell">EffectErase</div>
+              </div>
+            </div>
+          </div>
+          <div class="caseRow js-comp-case">WILD_ENV001_00024</div>
+        </div>
+      </section>
+
+      <section class="section" id="comparison-portrait">
+        <h2 class="h2">Portrait Comparison</h2>
+        <div class="compBlock js-comp-block" data-default-case="WILD_ENV003_00088">
+          <div class="subh">ObjectClear / OmniPaint / EffectErase</div>
+          <div class="thumbRow">
+            <button class="thumbBtn isActive js-comp-thumb" type="button" data-case="WILD_ENV003_00088" data-src="assets/video/comp_vor_objectclear_WILD_ENV003_00088_stack.mp4">
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV003_00088" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+            </button>
+            <button class="thumbBtn js-comp-thumb" type="button" data-case="WILD_ENV003_00109" data-src="assets/video/comp_vor_objectclear_WILD_ENV003_00109_stack.mp4">
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV003_00109" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+            </button>
+            <button class="thumbBtn js-comp-thumb" type="button" data-case="WILD_ENV003_00149" data-src="assets/video/comp_vor_objectclear_WILD_ENV003_00149_stack.mp4">
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV003_00149" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+            </button>
+            <button class="thumbBtn js-comp-thumb" type="button" data-case="WILD_ENV003_00168" data-src="assets/video/comp_vor_objectclear_WILD_ENV003_00168_stack.mp4">
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV003_00168" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+            </button>
+          </div>
+          <div class="mainWrap">
+            <div class="mainFrame vert" style="--cols: 4">
+              <video class="mainVideo vert js-comp-main" muted autoplay loop playsinline preload="metadata">
+                <source src="assets/video/comp_vor_objectclear_WILD_ENV003_00088_stack.mp4" type="video/mp4" />
+              </video>
+              <div class="methodRow">
+                <div class="methodCell">Input</div>
+                <div class="methodCell">ObjectClear</div>
+                <div class="methodCell">OmniPaint</div>
+                <div class="methodCell">EffectErase</div>
+              </div>
+            </div>
+          </div>
+          <div class="caseRow js-comp-case">WILD_ENV003_00088</div>
+        </div>
+
+        <div class="compBlock js-comp-block" data-default-case="WILD_ENV003_00088">
+          <div class="subh">ProPainter / DiffuEraser / VACE / EffectErase</div>
+          <div class="thumbRow">
+            <button class="thumbBtn isActive js-comp-thumb" type="button" data-case="WILD_ENV003_00088" data-src="assets/video/comp_vor_propainter_WILD_ENV003_00088_stack.mp4">
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV003_00088" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+            </button>
+            <button class="thumbBtn js-comp-thumb" type="button" data-case="WILD_ENV003_00109" data-src="assets/video/comp_vor_propainter_WILD_ENV003_00109_stack.mp4">
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV003_00109" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+            </button>
+            <button class="thumbBtn js-comp-thumb" type="button" data-case="WILD_ENV003_00149" data-src="assets/video/comp_vor_propainter_WILD_ENV003_00149_stack.mp4">
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV003_00149" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+            </button>
+            <button class="thumbBtn js-comp-thumb" type="button" data-case="WILD_ENV003_00168" data-src="assets/video/comp_vor_propainter_WILD_ENV003_00168_stack.mp4">
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV003_00168" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+            </button>
+          </div>
+          <div class="mainWrap">
+            <div class="mainFrame vert" style="--cols: 5">
+              <video class="mainVideo vert js-comp-main" muted autoplay loop playsinline preload="metadata">
+                <source src="assets/video/comp_vor_propainter_WILD_ENV003_00088_stack.mp4" type="video/mp4" />
+              </video>
+              <div class="methodRow">
+                <div class="methodCell">Input</div>
+                <div class="methodCell">ProPainter</div>
+                <div class="methodCell">DiffuEraser</div>
+                <div class="methodCell">VACE</div>
+                <div class="methodCell">EffectErase</div>
+              </div>
+            </div>
+          </div>
+          <div class="caseRow js-comp-case">WILD_ENV003_00088</div>
+        </div>
+
+        <div class="compBlock js-comp-block" data-default-case="WILD_ENV003_00088">
+          <div class="subh">Minmax-Remover / ROSE / EffectErase</div>
+          <div class="thumbRow">
+            <button class="thumbBtn isActive js-comp-thumb" type="button" data-case="WILD_ENV003_00088" data-src="assets/video/comp_vor_remove_WILD_ENV003_00088_stack.mp4">
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV003_00088" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+            </button>
+            <button class="thumbBtn js-comp-thumb" type="button" data-case="WILD_ENV003_00109" data-src="assets/video/comp_vor_remove_WILD_ENV003_00109_stack.mp4">
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV003_00109" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+            </button>
+            <button class="thumbBtn js-comp-thumb" type="button" data-case="WILD_ENV003_00149" data-src="assets/video/comp_vor_remove_WILD_ENV003_00149_stack.mp4">
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV003_00149" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+            </button>
+            <button class="thumbBtn js-comp-thumb" type="button" data-case="WILD_ENV003_00168" data-src="assets/video/comp_vor_remove_WILD_ENV003_00168_stack.mp4">
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV003_00168" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+            </button>
+          </div>
+          <div class="mainWrap">
+            <div class="mainFrame vert" style="--cols: 4">
+              <video class="mainVideo vert js-comp-main" muted autoplay loop playsinline preload="metadata">
+                <source src="assets/video/comp_vor_remove_WILD_ENV003_00088_stack.mp4" type="video/mp4" />
+              </video>
+              <div class="methodRow">
+                <div class="methodCell">Input</div>
+                <div class="methodCell">Minmax-Remover</div>
+                <div class="methodCell">ROSE</div>
+                <div class="methodCell">EffectErase</div>
+              </div>
+            </div>
+          </div>
+          <div class="caseRow js-comp-case">WILD_ENV003_00088</div>
+        </div>
+      </section>
+
+      <section class="section" id="dataset">
+        <h2 class="h2">Dataset Pipeline</h2>
+        <div class="figure">
+          <img src="assets/img/data_pipeline.svg" alt="Dataset pipeline" />
+        </div>
+        <div class="figCap">
+          <span class="capStrong">Dataset Construction Pipeline of VOR.</span>
+          VOR is a hybrid dataset combining synthetic data and real-world captures. Synthetic data are generated in Blender using 3D environments, objects, and animations collected from public sources, together with carefully designed natural object and camera trajectories. Real-world data are recorded across diverse scenes and object categories using cameras, followed by the Ken Burns effect to simulate camera motion. All videos are segmented by SAM2 and manually cleaned and refined by human annotators. The final dataset comprises triplet pairs of videos with and without the target object, and the corresponding mask.
+        </div>
+
+        <div class="subh">Dataset Demo</div>
+        <div class="demoGrid">
+          <video class="demoVideo" muted autoplay loop playsinline preload="metadata">
+            <source src="assets/video/vor_BLENDER_BEACH020_00002_stack.mp4" type="video/mp4" />
+          </video>
+          <video class="demoVideo" muted autoplay loop playsinline preload="metadata">
+            <source src="assets/video/vor_BLENDER_BEDROOM004_00004_stack.mp4" type="video/mp4" />
+          </video>
+          <video class="demoVideo" muted autoplay loop playsinline preload="metadata">
+            <source src="assets/video/vor_BLENDER_FOREST021_00041_stack.mp4" type="video/mp4" />
+          </video>
+          <video class="demoVideo" muted autoplay loop playsinline preload="metadata">
+            <source src="assets/video/vor_BLENDER_MOUNTAIN006_00008_stack.mp4" type="video/mp4" />
+          </video>
+          <video class="demoVideo" muted autoplay loop playsinline preload="metadata">
+            <source src="assets/video/vor_REAL_ENV900_00022_006_05_stack.mp4" type="video/mp4" />
+          </video>
+          <video class="demoVideo" muted autoplay loop playsinline preload="metadata">
+            <source src="assets/video/vor_REAL_ENV800_00026_006_05_stack.mp4" type="video/mp4" />
+          </video>
+        </div>
+      </section>
+
+      <section class="section" id="method">
+        <h2 class="h2">Method</h2>
+        <div class="figure">
+          <img src="assets/img/method.svg" alt="Method" />
+        </div>
+        <div class="figCap">
+          <span class="capStrong">The framework of EffectErase.</span>
+          During training, removal and insertion pairs are encoded into the latent space by VAE and fused with noise via the Adaptor. Each DiT block performs cross-attention using fused features as Query and Task-Aware Region Guidance prompt embeddings as Key/Value, producing attention maps that highlight affected regions. We aggregate attention maps from all blocks and apply max pooling to obtain a maximal-activation map, which is supervised by the effect consistency loss (L<sub>EC</sub>) to encourage both tasks to focus on the same affected area. At inference, users can switch the model between removal and insertion by modifying the inputs.
+        </div>
+      </section>
+
+      <section class="section" id="bibtex">
+        <h2 class="h2">BibTeX</h2>
+        <pre id="bibtexText">@inproceedings{fu2026effecterase,
+  title     = {EffectErase: Joint Video Object Removal and Insertion for High-Quality Effect Erasing},
+  author    = {Fu, Yang and Zheng, Yike and Dai, Ziyun and Ding, Henghui},
+  booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
+  year      = {2026}
+}</pre>
+      </section>
+
+      <div class="foot">
+        <div>
+          This template is borrowed from
+          <a href="https://github.com/nerfies/nerfies.github.io" target="_blank" rel="noreferrer">nerfies</a>
+          and
+          <a href="https://github.com/sczhou/ProPainter_website" target="_blank" rel="noreferrer">ProPainter</a>.
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        (function () {
+          const btn = document.getElementById("bibtexCopyBtn");
+          const label = document.getElementById("bibtexCopyLabel");
+          const pre = document.getElementById("bibtexText");
+          if (!btn || !label || !pre) return;
+
+          const original = label.textContent || "BibTeX";
+          let timer = 0;
+
+          async function copyText(text) {
+            try {
+              await navigator.clipboard.writeText(text);
+              return true;
+            } catch (_) {
+              try {
+                const ta = document.createElement("textarea");
+                ta.value = text;
+                ta.setAttribute("readonly", "");
+                ta.style.position = "fixed";
+                ta.style.left = "-9999px";
+                document.body.appendChild(ta);
+                ta.select();
+                const ok = document.execCommand("copy");
+                document.body.removeChild(ta);
+                return ok;
+              } catch (_) {
+                return false;
+              }
+            }
+          }
+
+          btn.addEventListener("click", async () => {
+            const text = pre.textContent || "";
+            const ok = await copyText(text);
+            label.textContent = ok ? "Copied" : "Copy failed";
+            window.clearTimeout(timer);
+            timer = window.setTimeout(() => {
+              label.textContent = original;
+            }, 1200);
+          });
+        })();
+
+        (function () {
+          const lazyVideos = document.querySelectorAll("video.cmpVideo, video.demoVideo, video.mainVideo, video.videoFull");
+          const tasks = [];
+          for (const v of lazyVideos) {
+            const source = v.querySelector("source");
+            if (!source) continue;
+            const src = source.getAttribute("src") || "";
+            if (!src) continue;
+            v.dataset.src = v.dataset.src || src;
+            source.removeAttribute("src");
+            v.preload = "none";
+            tasks.push({ v, source });
+          }
+
+          function load(v, source) {
+            if (!v.dataset.src) return;
+            if (source.getAttribute("src")) return;
+            source.setAttribute("src", v.dataset.src);
+            v.load();
+            if (v.hasAttribute("autoplay")) {
+              const p = v.play();
+              if (p && typeof p.catch === "function") p.catch(() => {});
+            }
+          }
+
+          function unload(v, source) {
+            v.pause();
+            if (!source.getAttribute("src")) return;
+            source.removeAttribute("src");
+            v.load();
+          }
+
+          if (!tasks.length) return;
+
+          if (!("IntersectionObserver" in window)) {
+            for (const t of tasks) load(t.v, t.source);
+            return;
+          }
+
+          const io = new IntersectionObserver(
+            (entries) => {
+              for (const e of entries) {
+                const t = tasks.find((x) => x.v === e.target);
+                if (!t) continue;
+                if (e.isIntersecting) load(t.v, t.source);
+                else unload(t.v, t.source);
+              }
+            },
+            { rootMargin: "300px 0px", threshold: 0.01 }
+          );
+
+          for (const t of tasks) io.observe(t.v);
+        })();
+
+        (function () {
+          const blocks = document.querySelectorAll(".js-comp-block");
+
+          async function renderThumb(img, src) {
+            if (!img || !src || img.dataset.ready === "1") return;
+            img.dataset.ready = "1";
+
+            try {
+              const v = document.createElement("video");
+              v.muted = true;
+              v.playsInline = true;
+              v.preload = "metadata";
+              v.src = src;
+
+              await new Promise((resolve, reject) => {
+                const onLoaded = () => resolve();
+                const onError = () => reject(new Error("thumb load failed"));
+                v.addEventListener("loadeddata", onLoaded, { once: true });
+                v.addEventListener("error", onError, { once: true });
+              });
+
+              try {
+                v.currentTime = Math.min(0.15, Math.max(0, (v.duration || 1) * 0.05));
+                await new Promise((resolve) => v.addEventListener("seeked", resolve, { once: true }));
+              } catch (_) {}
+
+              const canvas = document.createElement("canvas");
+              canvas.width = v.videoWidth || 220;
+              canvas.height = v.videoHeight || 124;
+              const ctx = canvas.getContext("2d");
+              if (!ctx) return;
+              ctx.drawImage(v, 0, 0, canvas.width, canvas.height);
+              img.src = canvas.toDataURL("image/jpeg", 0.72);
+            } catch (_) {
+              img.dataset.ready = "0";
+            }
+          }
+
+          for (const block of blocks) {
+            const main = block.querySelector(".js-comp-main");
+            const caseEl = block.querySelector(".js-comp-case");
+            const thumbs = block.querySelectorAll(".js-comp-thumb");
+            if (!main || !thumbs.length) continue;
+
+            function setActive(btn) {
+              for (const t of thumbs) t.classList.toggle("isActive", t === btn);
+            }
+
+            function setMain(src, nextCase) {
+              main.src = src;
+              main.load();
+              main.muted = true;
+              const p = main.play();
+              if (p && typeof p.catch === "function") p.catch(() => {});
+              if (caseEl && nextCase) caseEl.textContent = nextCase;
+            }
+
+            const defCase = block.dataset.defaultCase || "";
+            if (defCase) {
+              const defBtn = Array.from(thumbs).find((b) => b.dataset.case === defCase) || thumbs[0];
+              setActive(defBtn);
+              if (defBtn.dataset.src) setMain(defBtn.dataset.src, defBtn.dataset.case || "");
+            } else {
+              const first = thumbs[0];
+              setActive(first);
+              if (first.dataset.src) setMain(first.dataset.src, first.dataset.case || "");
+            }
+
+            const thumbIo =
+              "IntersectionObserver" in window
+                ? new IntersectionObserver(
+                    (entries, observer) => {
+                      for (const e of entries) {
+                        if (!e.isIntersecting) continue;
+                        const img = e.target;
+                        const btn = img.closest(".js-comp-thumb");
+                        if (!btn) continue;
+                        if (btn.dataset.src) renderThumb(img, btn.dataset.src);
+                        observer.unobserve(img);
+                      }
+                    },
+                    { rootMargin: "300px 0px", threshold: 0.01 }
+                  )
+                : null;
+
+            for (const btn of thumbs) {
+              const img = btn.querySelector(".js-comp-thumb-img");
+              if (img && thumbIo) thumbIo.observe(img);
+              btn.addEventListener("click", () => {
+                setActive(btn);
+                if (btn.dataset.src) setMain(btn.dataset.src, btn.dataset.case || "");
+                if (img && btn.dataset.src) renderThumb(img, btn.dataset.src);
+              });
+            }
+          }
+        })();
+
+        const cmpNodes = document.querySelectorAll(".js-cmp");
+        if (!cmpNodes.length) return;
+
+        function setRatioFromVideo(cmp, v) {
+          if (!cmp || !v || !v.videoWidth || !v.videoHeight) return;
+          const ratio = (v.videoHeight / v.videoWidth) * 100;
+          cmp.style.setProperty("--ratio", ratio.toFixed(4) + "%");
+        }
+
+        function tryPlay(v) {
+          if (!v) return;
+          const p = v.play();
+          if (p && typeof p.catch === "function") p.catch(() => {});
+        }
+
+        function syncPlay(a, b) {
+          if (!a || !b) return;
+          tryPlay(a);
+          tryPlay(b);
+          a.addEventListener("play", () => tryPlay(b));
+          b.addEventListener("play", () => tryPlay(a));
+          a.addEventListener("pause", () => b.pause());
+          b.addEventListener("pause", () => a.pause());
+        }
+
+        function syncMinLoop(a, b) {
+          if (!a || !b) return;
+          a.loop = true;
+          b.loop = true;
+
+          let minDur = null;
+          const eps = 0.04;
+          let raf = 0;
+
+          function updateMinDur() {
+            if (Number.isFinite(a.duration) && Number.isFinite(b.duration)) {
+              minDur = Math.min(a.duration, b.duration);
+            }
+          }
+
+          function tick() {
+            if (minDur && Number.isFinite(minDur) && minDur > 0) {
+              const ta = a.currentTime;
+              const tb = b.currentTime;
+              if (ta >= minDur - eps || tb >= minDur - eps) {
+                a.currentTime = 0;
+                b.currentTime = 0;
+              }
+            }
+            raf = window.requestAnimationFrame(tick);
+          }
+
+          a.addEventListener("loadedmetadata", updateMinDur);
+          b.addEventListener("loadedmetadata", updateMinDur);
+          a.addEventListener("durationchange", updateMinDur);
+          b.addEventListener("durationchange", updateMinDur);
+          updateMinDur();
+
+          if (!raf) raf = window.requestAnimationFrame(tick);
+        }
+
+        let active = null;
+        function onMove(e) {
+          if (!active) return;
+          const rect = active.getBoundingClientRect();
+          const x = e.clientX;
+          const pct = ((x - rect.left) / rect.width) * 100;
+          const clamped = Math.max(0, Math.min(100, pct));
+          active.style.setProperty("--pos", String(clamped));
+        }
+        function onUp() {
+          active = null;
+        }
+        window.addEventListener("pointermove", onMove);
+        window.addEventListener("pointerup", onUp);
+
+        for (const cmp of cmpNodes) {
+          const v0 = cmp.querySelector(".js-cmp-base");
+          const v1 = cmp.querySelector(".js-cmp-over");
+
+          const pos = Number((getComputedStyle(cmp).getPropertyValue("--pos") || "56").trim()) || 56;
+          cmp.style.setProperty("--pos", String(pos));
+
+          if (v0) {
+            v0.addEventListener("loadedmetadata", () => setRatioFromVideo(cmp, v0), { once: true });
+            setRatioFromVideo(cmp, v0);
+          }
+          syncPlay(v0, v1);
+          syncMinLoop(v0, v1);
+
+          cmp.addEventListener("pointerdown", (e) => {
+            active = cmp;
+            onMove(e);
+          });
+        }
+      })();
+    </script>
+  </body>
+</html>
