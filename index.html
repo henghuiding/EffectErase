@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
     <title>EffectErase: Joint Video Object Removal and Insertion for High-Quality Effect Erasing</title>
     <style>
       :root {
@@ -112,6 +113,8 @@
         background: #000;
         display: block;
       }
+      .ytWrap { width: 100%; aspect-ratio: 16 / 9; background: #000; border-radius: 16px; overflow: hidden; }
+      .ytFrame { width: 100%; height: 100%; border: 0; border-radius: 16px; display: block; }
 
       .cmpWrap { margin-top: 18px; }
       .cmpTitle { font-size: 14px; font-weight: 750; margin: 0 0 10px; color: var(--heroText); }
@@ -651,9 +654,19 @@
     <div class="wrap">
       <section class="section" id="demo">
         <h2 class="h2">Demo</h2>
-        <video class="videoFull" controls playsinline preload="metadata">
-          <source src="assets/video/demo.mp4" type="video/mp4" />
-        </video>
+        <div class="ytWrap">
+          <iframe
+            class="ytFrame"
+            width="560"
+            height="315"
+            src="https://www.youtube.com/embed/7jfXnH3rsKA?si=6WtfalAeNjIwQzR8"
+            title="YouTube video player"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerpolicy="strict-origin-when-cross-origin"
+            allowfullscreen
+          ></iframe>
+        </div>
       </section>
 
       <section class="section" id="comparison">
@@ -662,16 +675,16 @@
           <div class="subh">ObjectClear / OmniPaint / EffectErase</div>
           <div class="thumbRow">
             <button class="thumbBtn isActive js-comp-thumb" type="button" data-case="WILD_ENV001_00024" data-src="assets/video/comp_vor_objectclear_WILD_ENV001_00024_stack.mp4">
-              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV001_00024" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV001_00024" src="assets/img/comp_thumbs/comp_vor_objectclear_WILD_ENV001_00024_stack.jpg" />
             </button>
             <button class="thumbBtn js-comp-thumb" type="button" data-case="WILD_ENV001_00032" data-src="assets/video/comp_vor_objectclear_WILD_ENV001_00032_stack.mp4">
-              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV001_00032" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV001_00032" src="assets/img/comp_thumbs/comp_vor_objectclear_WILD_ENV001_00032_stack.jpg" />
             </button>
             <button class="thumbBtn js-comp-thumb" type="button" data-case="WILD_ENV002_00040" data-src="assets/video/comp_vor_objectclear_WILD_ENV002_00040_stack.mp4">
-              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV002_00040" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV002_00040" src="assets/img/comp_thumbs/comp_vor_objectclear_WILD_ENV002_00040_stack.jpg" />
             </button>
             <button class="thumbBtn js-comp-thumb" type="button" data-case="WILD_ENV002_00062" data-src="assets/video/comp_vor_objectclear_WILD_ENV002_00062_stack.mp4">
-              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV002_00062" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV002_00062" src="assets/img/comp_thumbs/comp_vor_objectclear_WILD_ENV002_00062_stack.jpg" />
             </button>
           </div>
           <div class="mainWrap">
@@ -694,16 +707,16 @@
           <div class="subh">ProPainter / DiffuEraser / VACE / EffectErase</div>
           <div class="thumbRow">
             <button class="thumbBtn isActive js-comp-thumb" type="button" data-case="WILD_ENV001_00024" data-src="assets/video/comp_vor_propainter_WILD_ENV001_00024_stack.mp4">
-              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV001_00024" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV001_00024" src="assets/img/comp_thumbs/comp_vor_propainter_WILD_ENV001_00024_stack.jpg" />
             </button>
             <button class="thumbBtn js-comp-thumb" type="button" data-case="WILD_ENV001_00032" data-src="assets/video/comp_vor_propainter_WILD_ENV001_00032_stack.mp4">
-              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV001_00032" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV001_00032" src="assets/img/comp_thumbs/comp_vor_propainter_WILD_ENV001_00032_stack.jpg" />
             </button>
             <button class="thumbBtn js-comp-thumb" type="button" data-case="WILD_ENV002_00040" data-src="assets/video/comp_vor_propainter_WILD_ENV002_00040_stack.mp4">
-              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV002_00040" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV002_00040" src="assets/img/comp_thumbs/comp_vor_propainter_WILD_ENV002_00040_stack.jpg" />
             </button>
             <button class="thumbBtn js-comp-thumb" type="button" data-case="WILD_ENV002_00062" data-src="assets/video/comp_vor_propainter_WILD_ENV002_00062_stack.mp4">
-              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV002_00062" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV002_00062" src="assets/img/comp_thumbs/comp_vor_propainter_WILD_ENV002_00062_stack.jpg" />
             </button>
           </div>
           <div class="mainWrap">
@@ -727,16 +740,16 @@
           <div class="subh">Minmax-Remover / ROSE / EffectErase</div>
           <div class="thumbRow">
             <button class="thumbBtn isActive js-comp-thumb" type="button" data-case="WILD_ENV001_00024" data-src="assets/video/comp_vor_remove_WILD_ENV001_00024_stack.mp4">
-              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV001_00024" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV001_00024" src="assets/img/comp_thumbs/comp_vor_remove_WILD_ENV001_00024_stack.jpg" />
             </button>
             <button class="thumbBtn js-comp-thumb" type="button" data-case="WILD_ENV001_00032" data-src="assets/video/comp_vor_remove_WILD_ENV001_00032_stack.mp4">
-              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV001_00032" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV001_00032" src="assets/img/comp_thumbs/comp_vor_remove_WILD_ENV001_00032_stack.jpg" />
             </button>
             <button class="thumbBtn js-comp-thumb" type="button" data-case="WILD_ENV002_00040" data-src="assets/video/comp_vor_remove_WILD_ENV002_00040_stack.mp4">
-              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV002_00040" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV002_00040" src="assets/img/comp_thumbs/comp_vor_remove_WILD_ENV002_00040_stack.jpg" />
             </button>
             <button class="thumbBtn js-comp-thumb" type="button" data-case="WILD_ENV002_00062" data-src="assets/video/comp_vor_remove_WILD_ENV002_00062_stack.mp4">
-              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV002_00062" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV002_00062" src="assets/img/comp_thumbs/comp_vor_remove_WILD_ENV002_00062_stack.jpg" />
             </button>
           </div>
           <div class="mainWrap">
@@ -762,16 +775,16 @@
           <div class="subh">ObjectClear / OmniPaint / EffectErase</div>
           <div class="thumbRow">
             <button class="thumbBtn isActive js-comp-thumb" type="button" data-case="WILD_ENV003_00088" data-src="assets/video/comp_vor_objectclear_WILD_ENV003_00088_stack.mp4">
-              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV003_00088" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV003_00088" src="assets/img/comp_thumbs/comp_vor_objectclear_WILD_ENV003_00088_stack.jpg" />
             </button>
             <button class="thumbBtn js-comp-thumb" type="button" data-case="WILD_ENV003_00109" data-src="assets/video/comp_vor_objectclear_WILD_ENV003_00109_stack.mp4">
-              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV003_00109" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV003_00109" src="assets/img/comp_thumbs/comp_vor_objectclear_WILD_ENV003_00109_stack.jpg" />
             </button>
             <button class="thumbBtn js-comp-thumb" type="button" data-case="WILD_ENV003_00149" data-src="assets/video/comp_vor_objectclear_WILD_ENV003_00149_stack.mp4">
-              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV003_00149" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV003_00149" src="assets/img/comp_thumbs/comp_vor_objectclear_WILD_ENV003_00149_stack.jpg" />
             </button>
             <button class="thumbBtn js-comp-thumb" type="button" data-case="WILD_ENV003_00168" data-src="assets/video/comp_vor_objectclear_WILD_ENV003_00168_stack.mp4">
-              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV003_00168" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV003_00168" src="assets/img/comp_thumbs/comp_vor_objectclear_WILD_ENV003_00168_stack.jpg" />
             </button>
           </div>
           <div class="mainWrap">
@@ -794,16 +807,16 @@
           <div class="subh">ProPainter / DiffuEraser / VACE / EffectErase</div>
           <div class="thumbRow">
             <button class="thumbBtn isActive js-comp-thumb" type="button" data-case="WILD_ENV003_00088" data-src="assets/video/comp_vor_propainter_WILD_ENV003_00088_stack.mp4">
-              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV003_00088" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV003_00088" src="assets/img/comp_thumbs/comp_vor_propainter_WILD_ENV003_00088_stack.jpg" />
             </button>
             <button class="thumbBtn js-comp-thumb" type="button" data-case="WILD_ENV003_00109" data-src="assets/video/comp_vor_propainter_WILD_ENV003_00109_stack.mp4">
-              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV003_00109" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV003_00109" src="assets/img/comp_thumbs/comp_vor_propainter_WILD_ENV003_00109_stack.jpg" />
             </button>
             <button class="thumbBtn js-comp-thumb" type="button" data-case="WILD_ENV003_00149" data-src="assets/video/comp_vor_propainter_WILD_ENV003_00149_stack.mp4">
-              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV003_00149" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV003_00149" src="assets/img/comp_thumbs/comp_vor_propainter_WILD_ENV003_00149_stack.jpg" />
             </button>
             <button class="thumbBtn js-comp-thumb" type="button" data-case="WILD_ENV003_00168" data-src="assets/video/comp_vor_propainter_WILD_ENV003_00168_stack.mp4">
-              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV003_00168" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV003_00168" src="assets/img/comp_thumbs/comp_vor_propainter_WILD_ENV003_00168_stack.jpg" />
             </button>
           </div>
           <div class="mainWrap">
@@ -827,16 +840,16 @@
           <div class="subh">Minmax-Remover / ROSE / EffectErase</div>
           <div class="thumbRow">
             <button class="thumbBtn isActive js-comp-thumb" type="button" data-case="WILD_ENV003_00088" data-src="assets/video/comp_vor_remove_WILD_ENV003_00088_stack.mp4">
-              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV003_00088" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV003_00088" src="assets/img/comp_thumbs/comp_vor_remove_WILD_ENV003_00088_stack.jpg" />
             </button>
             <button class="thumbBtn js-comp-thumb" type="button" data-case="WILD_ENV003_00109" data-src="assets/video/comp_vor_remove_WILD_ENV003_00109_stack.mp4">
-              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV003_00109" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV003_00109" src="assets/img/comp_thumbs/comp_vor_remove_WILD_ENV003_00109_stack.jpg" />
             </button>
             <button class="thumbBtn js-comp-thumb" type="button" data-case="WILD_ENV003_00149" data-src="assets/video/comp_vor_remove_WILD_ENV003_00149_stack.mp4">
-              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV003_00149" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV003_00149" src="assets/img/comp_thumbs/comp_vor_remove_WILD_ENV003_00149_stack.jpg" />
             </button>
             <button class="thumbBtn js-comp-thumb" type="button" data-case="WILD_ENV003_00168" data-src="assets/video/comp_vor_remove_WILD_ENV003_00168_stack.mp4">
-              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV003_00168" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+              <img class="thumbImg js-comp-thumb-img" alt="WILD_ENV003_00168" src="assets/img/comp_thumbs/comp_vor_remove_WILD_ENV003_00168_stack.jpg" />
             </button>
           </div>
           <div class="mainWrap">
@@ -902,20 +915,18 @@
 
       <section class="section" id="bibtex">
         <h2 class="h2">BibTeX</h2>
-        <pre id="bibtexText">@inproceedings{fu2026effecterase,
-  title     = {EffectErase: Joint Video Object Removal and Insertion for High-Quality Effect Erasing},
+        <pre id="bibtexText">@inproceedings{EffectErase,
+  title     = {{EffectErase}: Joint Video Object Removal and Insertion for High-Quality Effect Erasing},
   author    = {Fu, Yang and Zheng, Yike and Dai, Ziyun and Ding, Henghui},
   booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
   year      = {2026}
 }</pre>
       </section>
-
+<a href="https://clustrmaps.com/site/1c3b8" title="Visit tracker" target="_blank"><img src="https://mapmyvisitors.com/map.png?d=86-6RWxx0rDbaYKzLSLBnw3x3EblJbfXQpdp1Ckn4dQ&cl=ffffff" height="1" width="1"/ style="display:block;margin-top:5px;margin-bottom:0px;margin-left:auto;text-align:right"></a>
+  <footer class="footer">
       <div class="foot">
         <div>
-          This template is borrowed from
-          <a href="https://github.com/nerfies/nerfies.github.io" target="_blank" rel="noreferrer">nerfies</a>
-          and
-          <a href="https://github.com/sczhou/ProPainter_website" target="_blank" rel="noreferrer">ProPainter</a>.
+          © FudanCVL | Last updated: 18/03/2026
         </div>
       </div>
     </div>
@@ -1021,41 +1032,6 @@
         (function () {
           const blocks = document.querySelectorAll(".js-comp-block");
 
-          async function renderThumb(img, src) {
-            if (!img || !src || img.dataset.ready === "1") return;
-            img.dataset.ready = "1";
-
-            try {
-              const v = document.createElement("video");
-              v.muted = true;
-              v.playsInline = true;
-              v.preload = "metadata";
-              v.src = src;
-
-              await new Promise((resolve, reject) => {
-                const onLoaded = () => resolve();
-                const onError = () => reject(new Error("thumb load failed"));
-                v.addEventListener("loadeddata", onLoaded, { once: true });
-                v.addEventListener("error", onError, { once: true });
-              });
-
-              try {
-                v.currentTime = Math.min(0.15, Math.max(0, (v.duration || 1) * 0.05));
-                await new Promise((resolve) => v.addEventListener("seeked", resolve, { once: true }));
-              } catch (_) {}
-
-              const canvas = document.createElement("canvas");
-              canvas.width = v.videoWidth || 220;
-              canvas.height = v.videoHeight || 124;
-              const ctx = canvas.getContext("2d");
-              if (!ctx) return;
-              ctx.drawImage(v, 0, 0, canvas.width, canvas.height);
-              img.src = canvas.toDataURL("image/jpeg", 0.72);
-            } catch (_) {
-              img.dataset.ready = "0";
-            }
-          }
-
           for (const block of blocks) {
             const main = block.querySelector(".js-comp-main");
             const caseEl = block.querySelector(".js-comp-case");
@@ -1086,30 +1062,10 @@
               if (first.dataset.src) setMain(first.dataset.src, first.dataset.case || "");
             }
 
-            const thumbIo =
-              "IntersectionObserver" in window
-                ? new IntersectionObserver(
-                    (entries, observer) => {
-                      for (const e of entries) {
-                        if (!e.isIntersecting) continue;
-                        const img = e.target;
-                        const btn = img.closest(".js-comp-thumb");
-                        if (!btn) continue;
-                        if (btn.dataset.src) renderThumb(img, btn.dataset.src);
-                        observer.unobserve(img);
-                      }
-                    },
-                    { rootMargin: "300px 0px", threshold: 0.01 }
-                  )
-                : null;
-
             for (const btn of thumbs) {
-              const img = btn.querySelector(".js-comp-thumb-img");
-              if (img && thumbIo) thumbIo.observe(img);
               btn.addEventListener("click", () => {
                 setActive(btn);
                 if (btn.dataset.src) setMain(btn.dataset.src, btn.dataset.case || "");
-                if (img && btn.dataset.src) renderThumb(img, btn.dataset.src);
               });
             }
           }
